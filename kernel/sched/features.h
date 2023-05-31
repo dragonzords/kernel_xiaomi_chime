@@ -4,7 +4,14 @@
  * them to run sooner, but does not allow tons of sleepers to
  * rip the spread apart.
  */
+#define SCHED_FEAT_FAIR_SLEEPERS 1
 SCHED_FEAT(GENTLE_FAIR_SLEEPERS, false)
+
+/*
+ * Using the avg_vruntime, do the right thing and preserve lag across
+ * sleep+wake cycles. EEVDF placement strategy #1, #2 if disabled.
+ */
+#define SCHED_FEAT_PLACE_LAG 1
 
 /*
  * Prefer to schedule the task we woke last (assuming it failed
