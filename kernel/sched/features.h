@@ -13,17 +13,10 @@
  * wakeup-preemption), since its likely going to consume data we
  * touched, increases cache locality.
  */
-SCHED_FEAT(NEXT_BUDDY, true)
+SCHED_FEAT(NEXT_BUDDY, false)
 
 /*
- * Prefer to schedule the task that ran last (when we did
- * wake-preempt) as that likely will touch the same data, increases
- * cache locality.
- */
-SCHED_FEAT(LAST_BUDDY, true)
-
-/*
- * Consider buddies to be cache hot, decreases the likelyness of a
+ * Consider buddies to be cache hot, decreases the likeliness of a
  * cache buddy being migrated away, increases cache locality.
  */
 SCHED_FEAT(CACHE_HOT_BUDDY, true)
@@ -124,5 +117,3 @@ SCHED_FEAT(SCHEDTUNE_BOOST_HOLD_ALL, false)
  * If disabled, boosts will only bias tasks to higher-capacity CPUs.
  */
 SCHED_FEAT(SCHEDTUNE_BOOST_UTIL, false)
-
-#define SCHED_FEAT_EEVDF 1
