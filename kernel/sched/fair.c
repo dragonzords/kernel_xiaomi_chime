@@ -4127,6 +4127,10 @@ void remove_entity_load_avg(struct sched_entity *se)
 	 * Similarly for groups, they will have passed through
 	 * post_init_entity_util_avg() before unregister_sched_fair_group()
 	 * calls this.
+	 *
+	 * XXX in case entity_is_task(se) && task_of(se)->on_rq == MIGRATING
+	 * we could actually get the right time, since we're called with
+	 * rq->lock held, see detach_task().
 	 */
 
 	sync_entity_load_avg(se);
@@ -8656,8 +8660,6 @@ sd_loop:
 	return new_cpu;
 }
 
-static void detach_entity_cfs_rq(struct sched_entity *se);
-
 /*
  * Called immediately before a task is migrated to a new CPU; task_cpu(p) and
  * cfs_rq_of(p) references at time of call are still valid and identify the
@@ -8678,25 +8680,14 @@ static void migrate_task_rq_fair(struct task_struct *p, int new_cpu)
 		se->vruntime -= u64_u32_load(cfs_rq->min_vruntime);
 	}
 
-	if (p->on_rq == TASK_ON_RQ_MIGRATING) {
-		/*
-		 * In case of TASK_ON_RQ_MIGRATING we in fact hold the 'old'
-		 * rq->lock and can modify state directly.
-		 */
-		lockdep_assert_held(&task_rq(p)->lock);
-		detach_entity_cfs_rq(&p->se);
-
-	} else {
-		/*
-		 * We are supposed to update the task to "current" time, then
-		 * its up to date and ready to go to new CPU/cfs_rq. But we
-		 * have difficulty in getting what current time is, so simply
-		 * throw away the out-of-date time. This will result in the
-		 * wakee task is less decayed, but giving the wakee more load
-		 * sounds not bad.
-		 */
-		remove_entity_load_avg(&p->se);
-	}
+	/*
+	 * We are supposed to update the task to "current" time, then its up to date
+	 * and ready to go to new CPU/cfs_rq. But we have difficulty in getting
+	 * what current time is, so simply throw away the out-of-date time. This
+	 * will result in the wakee task is less decayed, but giving the wakee more
+	 * load sounds not bad.
+	 */
+	remove_entity_load_avg(&p->se);
 
 	/* Tell new CPU we are migrated */
 	p->se.avg.last_update_time = 0;
