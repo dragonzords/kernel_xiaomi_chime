@@ -4441,13 +4441,6 @@ place_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 	if (!initial) {
 		unsigned long thresh = sysctl_sched_latency;
 
-		/*
-		 * Halve their sleep time's effect, to allow
-		 * for a gentler effect of sleepers:
-		 */
-		if (sched_feat(GENTLE_FAIR_SLEEPERS))
-			thresh >>= 1;
-
 		vruntime -= thresh;
 #ifdef CONFIG_SCHED_WALT
 		if (entity_is_task(se)) {
